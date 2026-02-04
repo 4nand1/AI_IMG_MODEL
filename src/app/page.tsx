@@ -22,7 +22,7 @@ export default function Page() {
           Image creator
         </Button>
 
-        <Button
+         <Button
           variant={activeTab === "analysis" ? "default" : "outline"}
           onClick={() => setActiveTab("analysis")}
         >
