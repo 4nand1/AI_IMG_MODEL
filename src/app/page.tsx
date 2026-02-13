@@ -4,6 +4,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import ImageAnalysis from "@/app/components/tabs/ImageAnalysis";
 import IngredientRecognition from "@/app/components/tabs/ImageCreator";
 import ImageCreator from "@/app/components/tabs/IngredientTab";
+import ChatWidget from "./components/tabs/ChatWidget";
 
 export default function Home() {
   return (
@@ -36,6 +37,7 @@ export default function Home() {
           </Tabs>
         </div>
       </main>
+      <ChatWidget/>
     </div>
   );
 }
