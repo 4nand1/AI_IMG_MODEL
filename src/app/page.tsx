@@ -7,6 +7,8 @@ import { ImageCreator } from "./_components/tabs/ImageCreator";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import ChatWidget from "./_components/tabs/ChatWidget";
+import { Header } from "./_components/tabs/Header";
+
 
 export default function Home() {
   const [activeTab, setActiveTab] = useState<
@@ -16,6 +18,7 @@ export default function Home() {
   return (
     <div className="flex flex-col justify-between h-screen pb-30 items-end">
       <div className="flex flex-col justify-center items-center w-screen">
+        <Header />
         <div className="p-6 w-full max-w-xl">
           <div className="h-9 bg-secondary rounded flex gap-1">
             <Button
