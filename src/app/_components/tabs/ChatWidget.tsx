@@ -1,9 +1,10 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
-import { MessageCircle, X, Send, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Loader2, MessageCircle, Send } from "lucide-react";
+import { X } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 
 interface Message {
   role: "user" | "assistant";
@@ -28,9 +29,10 @@ export default function ChatWidget() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!input.trim() || isLoading) return;
+    if (!input.trim()) return;
 
     const userMessage = input.trim();
+
     setInput("");
     setMessages((prev) => [...prev, { role: "user", content: userMessage }]);
     setIsLoading(true);
@@ -41,9 +43,7 @@ export default function ChatWidget() {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({
-          messages: [...messages, { role: "user", content: userMessage }],
-        }),
+        body: JSON.stringify({ message: userMessage }),
       });
 
       if (!response.ok) throw new Error("Failed to get response");
@@ -55,7 +55,7 @@ export default function ChatWidget() {
         { role: "assistant", content: data.message },
       ]);
     } catch (error) {
-      console.error("Error:", error);
+      console.error("Error fetching chat response:", error);
       setMessages((prev) => [
         ...prev,
         {
@@ -72,8 +72,8 @@ export default function ChatWidget() {
     <>
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="fixed bottom-6 right-6 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-zinc-800 text-white shadow-lg transition-transform hover:scale-105 hover:bg-zinc-700"
-        aria-label={isOpen ? "Close chat" : "Open chat"}
+        className="fixed bottom-6 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-zinc-800 text-white shadow-lg transition-transform hover:scale-105 hover:bg-zinc-700"
+        aria-label={isOpen ? "Close Chat" : "Open Chat"}
       >
         {isOpen ? (
           <X className="h-6 w-6" />

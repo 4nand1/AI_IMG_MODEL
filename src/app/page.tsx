@@ -1,43 +1,56 @@
 "use client";
 
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import ImageAnalysis from "@/app/components/tabs/ImageAnalysis";
-import IngredientRecognition from "@/app/components/tabs/ImageCreator";
-import ImageCreator from "@/app/components/tabs/IngredientTab";
-import ChatWidget from "./components/tabs/ChatWidget";
+import Image from "next/image";
+import { ImageAnalysis } from "./_components/tabs/ImageAnalysis";
+import { IngredientRecognition } from "./_components/tabs/IngredientRecognition";
+import { ImageCreator } from "./_components/tabs/ImageCreator";
+import { Button } from "@/components/ui/button";
+import { useState } from "react";
+import ChatWidget from "./_components/tabs/ChatWidget";
 
 export default function Home() {
+  const [activeTab, setActiveTab] = useState<
+    "analysis" | "ingredient" | "creator"
+  >("analysis");
+
   return (
-    <div className="min-h-screen bg-white">
-      <header className="border-b px-6 py-4">
-        <h1 className="text-lg font-semibold">AI tools</h1>
-      </header>
+    <div className="flex flex-col justify-between h-screen pb-30 items-end">
+      <div className="flex flex-col justify-center items-center w-screen">
+        <div className="p-6 w-full max-w-xl">
+          <div className="h-9 bg-secondary rounded flex gap-1">
+            <Button
+              variant={activeTab === "analysis" ? "default" : "secondary"}
+              className="flex-1"
+              onClick={() => setActiveTab("analysis")}
+            >
+              Image analysis
+            </Button>
 
-      <main className="flex justify-center px-6 py-8">
-        <div className="w-full max-w-2xl">
-          <Tabs defaultValue="image-analysis" className="w-full">
-            <TabsList className="mb-6 grid w-full max-w-md mx-auto grid-cols-3">
-              <TabsTrigger value="image-analysis">Image analysis</TabsTrigger>
-              <TabsTrigger value="ingredient-recognition">
-                Ingredient recognition
-              </TabsTrigger>
-              <TabsTrigger value="image-creator">Image creator</TabsTrigger>
-            </TabsList>
+            <Button
+              variant={activeTab === "ingredient" ? "default" : "secondary"}
+              className="flex-1"
+              onClick={() => setActiveTab("ingredient")}
+            >
+              Ingredient recognition
+            </Button>
 
-            <TabsContent value="image-analysis">
-              <ImageAnalysis />
-            </TabsContent>
+            <Button
+              variant={activeTab === "creator" ? "default" : "secondary"}
+              className="flex-1"
+              onClick={() => setActiveTab("creator")}
+            >
+              Image creator
+            </Button>
+          </div>
 
-            <TabsContent value="ingredient-recognition">
-              <IngredientRecognition />
-            </TabsContent>
-            <TabsContent value="image-creator">
-              <ImageCreator />
-            </TabsContent>
-          </Tabs>
+          <div className="mt-6">
+            {activeTab === "analysis" && <ImageAnalysis />}
+            {activeTab === "ingredient" && <IngredientRecognition />}
+            {activeTab === "creator" && <ImageCreator />}
+          </div>
         </div>
-      </main>
-      <ChatWidget/>
+      </div>
+      <ChatWidget />
     </div>
   );
 }
