@@ -1,72 +1,89 @@
+"use client";
+
 import { Button } from "@/components/ui/button";
+import Image from "next/image";
 import { Input } from "@/components/ui/input";
-import {
-  FileSpreadsheet,
-  FileText,
-  Loader2,
-  RotateCw,
-  Sparkles,
-} from "lucide-react";
+import { FileText, Loader2, RotateCw, Sparkles } from "lucide-react";
 
 import { pipeline } from "@huggingface/transformers";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 
-const pipe = await pipeline(
-  "image-to-text",
-  "Xenova/vit-gpt2-image-captioning",
-);
+type ImageCaptionOutput = Array<{ generated_text: string }>;
+type ImageCaptionPipeline = (image: string) => Promise<ImageCaptionOutput>;
 
 export function ImageAnalysis() {
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [result, setResult] = useState<string | null>(null);
-  const [isModelLoading, setIsModelloading] = useState(false);
+  const [isModelLoading, setIsModelLoading] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const captionerRef = useRef<any>(null);
+  const captionerRef = useRef<ImageCaptionPipeline | null>(null);
+  const previewUrlRef = useRef<string | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (previewUrlRef.current) {
+        URL.revokeObjectURL(previewUrlRef.current);
+      }
+    };
+  }, []);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
       setSelectedImage(file);
 
+      if (previewUrlRef.current) {
+        URL.revokeObjectURL(previewUrlRef.current);
+      }
+
       const url = URL.createObjectURL(file);
+      previewUrlRef.current = url;
       setImagePreview(url);
       setResult(null);
     }
   };
 
   const handleReset = () => {
+    if (previewUrlRef.current) {
+      URL.revokeObjectURL(previewUrlRef.current);
+      previewUrlRef.current = null;
+    }
+
     setSelectedImage(null);
     setImagePreview(null);
     setResult(null);
+    setIsLoading(false);
+    setIsModelLoading(false);
   };
 
   const handleGenerate = async () => {
     if (!imagePreview) return;
 
+    setIsLoading(true);
+
     try {
       if (!captionerRef.current) {
-        setIsModelloading(true);
-        captionerRef.current = await pipeline(
+        setIsModelLoading(true);
+        captionerRef.current = (await pipeline(
           "image-to-text",
           "Xenova/vit-gpt2-image-captioning",
-        );
-        setIsModelloading(false);
+        )) as unknown as ImageCaptionPipeline;
       }
       const output = await captionerRef.current(imagePreview);
 
-      if (Array.isArray(output) && output.length > 0) {
-        const caption = (output[0] as { generated_text: string })
-          .generated_text;
+      if (output.length > 0) {
+        const caption = output[0].generated_text;
         setResult(caption);
       }
     } catch (error) {
       console.error("Error generating caption:", error);
       setResult("Error analyzing image. Please try again.");
     } finally {
-      setIsModelloading(false);
+      setIsModelLoading(false);
+      setIsLoading(false);
     }
   };
 
@@ -76,8 +93,8 @@ export function ImageAnalysis() {
         <p className="flex gap-2 text-xl font-semibold items-center">
           <Sparkles /> Image analysis
         </p>
-        <Button variant={"outline"}>
-          <RotateCw className="text-gray-400" onClick={handleReset} />
+        <Button variant={"outline"} onClick={handleReset}>
+          <RotateCw className="text-gray-400" />
         </Button>
       </div>
       <p className="text-[14px] text-[#71717A] w-full">
@@ -107,9 +124,12 @@ export function ImageAnalysis() {
               </div>
               {imagePreview && (
                 <div className="mt-4">
-                  <img
+                  <Image
                     src={imagePreview}
                     alt="Preview"
+                    width={1200}
+                    height={800}
+                    unoptimized
                     className="max-h-64 rounded-lg object-contain"
                   />
                 </div>

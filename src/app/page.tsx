@@ -1,6 +1,5 @@
 "use client";
 
-import Image from "next/image";
 import { ImageAnalysis } from "./_components/tabs/ImageAnalysis";
 import { IngredientRecognition } from "./_components/tabs/IngredientRecognition";
 import { ImageCreator } from "./_components/tabs/ImageCreator";
@@ -8,7 +7,6 @@ import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import ChatWidget from "./_components/tabs/ChatWidget";
 import { Header } from "./_components/tabs/Header";
-
 
 export default function Home() {
   const [activeTab, setActiveTab] = useState<

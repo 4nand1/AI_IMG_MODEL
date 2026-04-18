@@ -2,14 +2,24 @@
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Image, RotateCw, Sparkles } from "lucide-react";
-import React, { useState } from "react";
+import NextImage from "next/image";
+import { Image as ImageIcon, RotateCw, Sparkles } from "lucide-react";
+import React, { useEffect, useRef, useState } from "react";
 
 export const ImageCreator = () => {
   const [prompt, setPrompt] = useState("");
   const [isGenerating, setIsGenerating] = useState(false);
   const [generatedImage, setGeneratedImage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const generatedImageUrlRef = useRef<string | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (generatedImageUrlRef.current) {
+        URL.revokeObjectURL(generatedImageUrlRef.current);
+      }
+    };
+  }, []);
 
   const handleGenerate = async () => {
     if (!prompt) return;
@@ -32,7 +42,13 @@ export const ImageCreator = () => {
       }
 
       const blob = await res.blob();
-      setGeneratedImage(URL.createObjectURL(blob));
+      if (generatedImageUrlRef.current) {
+        URL.revokeObjectURL(generatedImageUrlRef.current);
+      }
+
+      const imageUrl = URL.createObjectURL(blob);
+      generatedImageUrlRef.current = imageUrl;
+      setGeneratedImage(imageUrl);
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : "Unknown error occurred";
       console.error("Error generating image:", error);
@@ -43,6 +59,11 @@ export const ImageCreator = () => {
   };
 
   const handleReset = () => {
+    if (generatedImageUrlRef.current) {
+      URL.revokeObjectURL(generatedImageUrlRef.current);
+      generatedImageUrlRef.current = null;
+    }
+
     setPrompt("");
     setGeneratedImage(null);
     setError(null);
@@ -83,7 +104,7 @@ export const ImageCreator = () => {
 
       <div className="w-full flex flex-col gap-2 max-w-2xl mt-8 p-4">
         <p className="text-xl font-semibold flex gap-2 items-center">
-          <Image /> Result
+          <ImageIcon /> Result
         </p>
 
         {error && (
@@ -97,9 +118,12 @@ export const ImageCreator = () => {
             First, enter your text to generate an image.
           </p>
         ) : (
-          <img
+          <NextImage
             src={generatedImage}
             alt="Generated"
+            width={1200}
+            height={1200}
+            unoptimized
             className="rounded-lg w-full object-cover"
           />
         )}

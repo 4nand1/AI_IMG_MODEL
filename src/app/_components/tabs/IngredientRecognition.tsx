@@ -5,14 +5,21 @@ import { Input } from "@/components/ui/input";
 import { FileSpreadsheet, Loader2, RotateCw, Sparkles } from "lucide-react";
 import { pipeline } from "@huggingface/transformers";
 import { useRef, useState } from "react";
-import { Card, CardContent } from "@/components/ui/card";
-import { Label } from "@/components/ui/label";
+
+type TextGenerationOutput = Array<{ generated_text?: string }>;
+type TextGenerationPipeline = (
+  input: string,
+  options?: {
+    max_new_tokens?: number;
+    temperature?: number;
+  },
+) => Promise<TextGenerationOutput>;
 
 export function IngredientRecognition() {
   const [food, setFood] = useState("");
   const [ingredients, setIngredients] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
-  const modelRef = useRef<any>(null);
+  const modelRef = useRef<TextGenerationPipeline | null>(null);
 
   const handleReset = () => {
     setFood("");
@@ -28,10 +35,10 @@ export function IngredientRecognition() {
     try {
       if (!modelRef.current) {
         console.log("Loading model...");
-        modelRef.current = await pipeline(
+        modelRef.current = (await pipeline(
           "text-generation",
           "HuggingFaceTB/SmolLM2-135M-Instruct",
-        );
+        )) as unknown as TextGenerationPipeline;
         console.log("Model loaded");
       }
 
